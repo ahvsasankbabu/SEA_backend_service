@@ -17,82 +17,53 @@ import com.smartnotification.service.JwtService;
 import com.smartnotification.security.JwtFilter;
 import com.smartnotification.security.OAuth2SuccessHandler;
 
-
 @Configuration
 public class SecurityConfig {
-
 
     private final JwtFilter jwtFilter;
     private final UserRepository userRepository;
     private final JwtService jwtService;
 
-
-
     public SecurityConfig(
             JwtFilter jwtFilter,
             UserRepository userRepository,
             JwtService jwtService) {
-
         this.jwtFilter = jwtFilter;
         this.userRepository = userRepository;
         this.jwtService = jwtService;
     }
 
-
-
-
     @Bean
     @Order(1)
     SecurityFilterChain authSecurity(
             HttpSecurity http) throws Exception {
-
-
         http
             .securityMatcher("/auth/**")
-
             .csrf(csrf -> csrf.disable())
-
             .cors(Customizer.withDefaults())
-
             .sessionManagement(session ->
                 session.sessionCreationPolicy(
                     SessionCreationPolicy.STATELESS
                 )
             )
-
             .authorizeHttpRequests(auth ->
                 auth.anyRequest().permitAll()
             );
-
-
         return http.build();
     }
-
-
-
-
 
     @Bean
     @Order(2)
     SecurityFilterChain appSecurity(
             HttpSecurity http) throws Exception {
-
-
         http
-
             .csrf(csrf -> csrf.disable())
-
-
             .cors(Customizer.withDefaults())
-
-
             .sessionManagement(session ->
                 session.sessionCreationPolicy(
                     SessionCreationPolicy.IF_REQUIRED
                 )
             )
-
-
             .exceptionHandling(exception ->
                 exception.authenticationEntryPoint(
                     (request, response, ex) ->
@@ -102,32 +73,21 @@ public class SecurityConfig {
                         )
                 )
             )
-
-
             .authorizeHttpRequests(auth -> auth
-
                 .requestMatchers(
                     "/gmail/push",
                     "/oauth2/**",
-                    "/login/oauth2/**"
+                    "/login/oauth2/**",
+                    "/api/health"
                 ).permitAll()
-
-
                 .requestMatchers(
                     "/gmail"
                 ).permitAll()
-
-
                 .requestMatchers(
                     "/accounts/**"
                 ).authenticated()
-
-
                 .anyRequest().authenticated()
             )
-
-
-
             .oauth2Login(oauth ->
                 oauth.successHandler(
                     new OAuth2SuccessHandler(
@@ -136,28 +96,17 @@ public class SecurityConfig {
                     )
                 )
             )
-
-
-
             .addFilterBefore(
                 jwtFilter,
                 UsernamePasswordAuthenticationFilter.class
             );
-
-
         return http.build();
     }
-
-
-
-
 
     @Bean
     AuthenticationManager authenticationManager(
             AuthenticationConfiguration configuration)
             throws Exception {
-
-
         return configuration.getAuthenticationManager();
     }
 }
