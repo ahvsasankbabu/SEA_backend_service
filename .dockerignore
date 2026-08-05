@@ -1,0 +1,15 @@
+target/
+.git/
+.gitignore
+.env
+.mvn/wrapper/maven-wrapper.jar
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+HELP.md
+deps.txt
+logging.properties
+minified_firebase.txt
