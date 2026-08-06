@@ -1,5 +1,7 @@
 package com.smartnotification.config;
 
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import com.smartnotification.security.TokenCapturingAuthorizationRequestResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -20,18 +22,22 @@ import com.smartnotification.security.OAuth2SuccessHandler;
 @Configuration
 public class SecurityConfig {
 
-    private final JwtFilter jwtFilter;
-    private final UserRepository userRepository;
-    private final JwtService jwtService;
+	// change the field list and constructor
+	private final JwtFilter jwtFilter;
+	private final UserRepository userRepository;
+	private final JwtService jwtService;
+	private final ClientRegistrationRepository clientRegistrationRepository; // new
 
-    public SecurityConfig(
-            JwtFilter jwtFilter,
-            UserRepository userRepository,
-            JwtService jwtService) {
-        this.jwtFilter = jwtFilter;
-        this.userRepository = userRepository;
-        this.jwtService = jwtService;
-    }
+	public SecurityConfig(
+	        JwtFilter jwtFilter,
+	        UserRepository userRepository,
+	        JwtService jwtService,
+	        ClientRegistrationRepository clientRegistrationRepository) { // new param
+	    this.jwtFilter = jwtFilter;
+	    this.userRepository = userRepository;
+	    this.jwtService = jwtService;
+	    this.clientRegistrationRepository = clientRegistrationRepository; // new
+	}
 
     @Bean
     @Order(1)
@@ -88,14 +94,21 @@ public class SecurityConfig {
                 ).authenticated()
                 .anyRequest().authenticated()
             )
-            .oauth2Login(oauth ->
-                oauth.successHandler(
-                    new OAuth2SuccessHandler(
-                        userRepository,
-                        jwtService
-                    )
-                )
-            )
+            .oauth2Login(oauth -> oauth
+            	    .authorizationEndpoint(endpoint -> endpoint
+            	        .authorizationRequestResolver(
+            	            new TokenCapturingAuthorizationRequestResolver(
+            	                clientRegistrationRepository, jwtService
+            	            )
+            	        )
+            	    )
+            	    .successHandler(
+            	        new OAuth2SuccessHandler(
+            	            userRepository,
+            	            jwtService
+            	        )
+            	    )
+            	)
             .addFilterBefore(
                 jwtFilter,
                 UsernamePasswordAuthenticationFilter.class

@@ -52,9 +52,15 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
 
 
+        String appUserEmail =
+                (String) request.getSession()
+                        .getAttribute("APP_USER_EMAIL");
+
+
+
         User user =
                 userRepository
-                .findByPrimaryEmail(gmailEmail)
+                .findByPrimaryEmail(appUserEmail)
                 .orElseThrow(() ->
                     new RuntimeException(
                         "Primary user not found"
